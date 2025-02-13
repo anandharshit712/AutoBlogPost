@@ -49,7 +49,7 @@ def save_blog_as_html(title, content, image_path):
     </body>
     </html>
     """
-    file_path = os.path.join(output_dir, "blog_post.html")
+    file_path = os.path.join(output_dir, "blog_post1.html")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"Blog post saved at: {file_path}")

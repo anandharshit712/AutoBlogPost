@@ -1,6 +1,6 @@
 import requests
-import base64
 import os
+import random
 from bs4 import BeautifulSoup
 
 # Directory setup
@@ -22,15 +22,18 @@ def extract_topic_from_url(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
     headlines = soup.find_all("h3")
-    if headlines:
-        return headlines[0].get_text()
+    topics = [headline.get_text() for headline in headlines if len(headline.get_text()) > 5]
+    if topics:
+        chosen_topic = random.choice(topics)
+        print(f"Selected topic: {chosen_topic}")
+        return chosen_topic
     else:
         return "The Future of AI in Content Creation"
 
-def generate_blog_content(topic):
+def generate_blog_content(topic, link):
     url = f"https://api-inference.huggingface.co/models/{HUGGINGFACE_MODEL}"
     headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-    payload = {"inputs": f"Write a detailed blog post on the topic: '{topic}'. Include an introduction, key points, and conclusion."}
+    payload = {"inputs": f"Write a detailed blog post on the topic: '{topic}'. Include an introduction, key points, and conclusion. Do not include the prompt or label any sections as 'Title'."}
 
     response = requests.post(url, headers=headers, json=payload)
 
@@ -81,15 +84,15 @@ def save_blog_as_html(title, content, image_path):
     </body>
     </html>
     """
-    file_path = os.path.join(output_dir, "blog_post.html")
+    file_path = os.path.join(output_dir, "blog_post1.html")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"Blog post saved at: {file_path}")
 
 # Main execution
-def generate_blog_with_image(topic):
+def generate_blog_with_image(topic, link):
     print(f"Generating blog content for topic: {topic}")
-    blog_content = generate_blog_content(topic)
+    blog_content = generate_blog_content(topic, link)
 
     print("Generating blog image...")
     image_path = generate_image(topic)
@@ -101,4 +104,4 @@ if __name__ == "__main__":
     news_url = "https://news.google.com/search?q=AI"
     print("Extracting topic from news site...")
     topic = extract_topic_from_url(news_url)
-    generate_blog_with_image(topic)
+    generate_blog_with_image(topic, news_url)
